@@ -1,0 +1,24 @@
+x = "hangman"
+wordList = list(x)
+wordLength = len(wordList)
+cryptList = []
+cryptSign = '*'
+i = 0
+j = 0
+gotcha = 0
+
+for j in range( wordLength ):
+    cryptList.append(cryptSign)
+
+guess = input()
+
+
+
+for i in range(wordLength):
+    if guess == wordList[i]:
+        gotcha = gotcha + 1
+        cryptList[i] = wordList[i]
+
+print(cryptList)
+
+#print(wordList)
