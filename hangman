@@ -6,19 +6,21 @@ cryptSign = '*'
 i = 0
 j = 0
 gotcha = 0
+attemptsCount = 0
 
 for j in range( wordLength ):
     cryptList.append(cryptSign)
 
-guess = input()
+while gotcha < wordLength:
+    guess = input()    
+    
+    for i in range(wordLength):
+        if guess == wordList[i]:
+            gotcha = gotcha + 1
+            cryptList[i] = wordList[i]
+    
+    print(cryptList)
+    attemptsCount = attemptsCount + 1
 
-
-
-for i in range(wordLength):
-    if guess == wordList[i]:
-        gotcha = gotcha + 1
-        cryptList[i] = wordList[i]
-
-print(cryptList)
-
+print('Total attempts:', attemptsCount)
 #print(wordList)
