@@ -1,0 +1,6 @@
+hangman
+watcher
+python
+lizard
+telegram
+group
