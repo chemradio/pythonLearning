@@ -1,0 +1,40 @@
+def readHospitalDetails(hospital_id):
+  cur = link.cursor()
+  cur.execute("SELECT Hospital_Id, Hospital_Name, Bed_Count FROM Hospitals WHERE Hospital_Id = %s", (hospital_id,))
+  row = cur.fetchone()
+  print('Hospital ID: = ' + row[0])
+  print('Hospital Name: = ' + row[1])
+  print('Bed Count: = ' + row[2])
+
+
+def readDoctorDetails(doctor_id):
+  cur = link.cursor()
+  cur.execute("SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Doctor_Id = %s", (doctor_id,))
+  row = cur.fetchone()
+  print('Doctor ID: = ' + row[0])
+  print('Doctor Name: = ' + row[1])
+  print('Hospital ID: = ' + row[2])
+  print('Joining Date: = ' + row[3])
+  print('Speciality: = ' + row[4])
+  print('Salary: = ' + row[5])
+  print('Experience: = ' + row[6])
+
+
+def getDoctordWithinHospital(hospital_id)
+  print('Hospital ID: = ' + hospital_id)
+  cur = link.cursor()
+  cur.execute("SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Hospital_Id = %s", (hospital_id,))
+  rows = cur.fetchall()
+
+  for row in rows:
+    print('Doctor ID: = ' + row[0])
+    print('Doctor Name: = ' + row[1])
+    print('Hospital ID: = ' + row[2])
+    print('Joining Date: = ' + row[3])
+    print('Speciality: = ' + row[4])
+    print('Salary: = ' + row[5])
+    print('Experience: = ' + row[6] + "\n")
+
+
+def updateDoctorsExperience(doctor_id):
+  
