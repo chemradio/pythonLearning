@@ -1,0 +1,132 @@
+import psycopg2
+
+link = psycopg2.connect(
+    database="postgres",
+    user="postgres",
+    password="whirlpool",
+    host="127.0.0.1",
+    port="5432"
+)
+
+cur = link.cursor()
+
+cur.execute('''CREATE TABLE Hospitals
+     (Hospital_Id INT PRIMARY KEY NOT NULL,
+     Hospital_Name TEXT NOT NULL,
+     Bed_Count INT NOT NULL);''')
+
+cur.execute('''CREATE TABLE Doctors  
+     (Doctor_Id INT PRIMARY KEY NOT NULL,
+     Doctor_Name TEXT NOT NULL,
+     Hospital_Id INT NOT NULL,
+     Joining_Date DATE NOT NULL,
+     Speciality TEXT NOT NULL,
+     Salary INT NOT NULL,
+     Experience INT NULL);''')
+     
+cur.execute(
+    "INSERT INTO Hospitals (Hospital_Id, Hospital_Name, Bed_Count) VALUES ( 1, 'Mayo Clinic', 200)"
+)
+
+cur.execute(
+    "INSERT INTO Hospitals (Hospital_Id, Hospital_Name, Bed_Count) VALUES ( 2, 'Cleveland Clinic', 400)"
+)
+
+cur.execute(
+    "INSERT INTO Hospitals (Hospital_Id, Hospital_Name, Bed_Count) VALUES ( 3, 'Johns Hopkins', 1000)"
+)
+
+cur.execute(
+    "INSERT INTO Hospitals (Hospital_Id, Hospital_Name, Bed_Count) VALUES ( 4, 'UCLA Medical Center', 1500)"
+)
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 101, 'David', 1, '2005-02-10', 'Pediatric', 40000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 102, 'Michael', 1, '2018-07-23', 'Oncologist', 20000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 103, 'Susan', 2, '2016-05-19', 'Garnacologist', 25000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 104, 'Robert', 2, '2017-12-28', 'Pediatric', 28000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 105, 'Linda', 3, '2004-06-04', 'Garnacologist', 20000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 106, 'William', 3, '2012-09-11', 'Dermatologist', 30000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 107, 'Richard', 4, '2014-08-21', 'Garnacologist', 32000)
+''')
+
+cur.execute('''
+    INSERT INTO Doctors (Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary)
+    VALUES ( 108, 'Karen', 4, '2011-10-17', 'Radiologist', 30000)
+''')
+
+
+def readHospitalDetails(hospital_id):
+  cur = link.cursor()
+  cur.execute("SELECT Hospital_Id, Hospital_Name, Bed_Count FROM Hospitals WHERE Hospital_Id = %s", (hospital_id,))
+  row = cur.fetchone()
+  print(f'Hospital ID: = {row[0]}')
+  print(f'Hospital Name: = {row[1]}')
+  print(f'Bed Count: =  {row[2]}\n')
+
+
+def readDoctorDetails(doctor_id):
+  cur = link.cursor()
+  cur.execute('''SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Doctor_Id = %s''', (doctor_id,))
+  row = cur.fetchone()
+  print(f'Doctor ID: = {row[0]}')
+  print(f'Doctor Name: = {row[1]}')
+  print(f'Hospital ID: = {row[2]}')
+  print(f'Joining Date: = {row[3]}')
+  print(f'Speciality: = {row[4]}')
+  print(f'Salary: = {row[5]}')
+  print(f'Experience: = {row[6]}\n')
+
+
+def getDoctordWithinHospital(hospital_id):
+  print(f'Hospital ID: = {hospital_id}\n')
+  cur = link.cursor()
+  cur.execute("SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Hospital_Id = %s", (hospital_id,))
+  rows = cur.fetchall()
+  for row in rows:
+    print(f'Doctor ID: = {row[0]}')
+    print(f'Doctor Name: = {row[1]}')
+    print(f'Hospital ID: = {row[2]}')
+    print(f'Joining Date: = {row[3]}')
+    print(f'Speciality: = {row[4]}')
+    print(f'Salary: = {row[5]}')
+    print(f'Experience: = {row[6]}\n')
+
+
+def updateDoctorsExperience(doctor_id):
+    cur = link.cursor()
+    cur.execute("UPDATE Doctors SET Experience = date_part('year',age(Joining_Date)) WHERE Doctor_Id = %s;", (doctor_id,))
+
+
+readHospitalDetails(1)
+readDoctorDetails(104)
+updateDoctorsExperience(104)
+readDoctorDetails(104)
+
+# link.commit()
+# link.close()
