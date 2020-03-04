@@ -3,7 +3,7 @@ import psycopg2
 link = psycopg2.connect(
     database="postgres",
     user="postgres",
-    password="whirlpool",
+    password="****",
     host="127.0.0.1",
     port="5432"
 )
@@ -23,7 +23,7 @@ cur.execute('''CREATE TABLE Doctors
      Speciality TEXT NOT NULL,
      Salary INT NOT NULL,
      Experience INT NULL);''')
-     
+
 cur.execute(
     "INSERT INTO Hospitals (Hospital_Id, Hospital_Name, Bed_Count) VALUES ( 1, 'Mayo Clinic', 200)"
 )
@@ -80,35 +80,23 @@ cur.execute('''
     VALUES ( 108, 'Karen', 4, '2011-10-17', 'Radiologist', 30000)
 ''')
 
+link.commit()
 
 def readHospitalDetails(hospital_id):
-  cur = link.cursor()
-  cur.execute("SELECT Hospital_Id, Hospital_Name, Bed_Count FROM Hospitals WHERE Hospital_Id = %s", (hospital_id,))
-  row = cur.fetchone()
-  print(f'Hospital ID: = {row[0]}')
-  print(f'Hospital Name: = {row[1]}')
-  print(f'Bed Count: =  {row[2]}\n')
+    cur = link.cursor()
+    cur.execute("SELECT Hospital_Id, Hospital_Name, Bed_Count FROM Hospitals WHERE Hospital_Id = %s", (hospital_id,))
+    row = cur.fetchone()
+    print(f'Hospital ID: = {row[0]}')
+    print(f'Hospital Name: = {row[1]}')
+    print(f'Bed Count: =  {row[2]}\n')
 
 
 def readDoctorDetails(doctor_id):
-  cur = link.cursor()
-  cur.execute('''SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Doctor_Id = %s''', (doctor_id,))
-  row = cur.fetchone()
-  print(f'Doctor ID: = {row[0]}')
-  print(f'Doctor Name: = {row[1]}')
-  print(f'Hospital ID: = {row[2]}')
-  print(f'Joining Date: = {row[3]}')
-  print(f'Speciality: = {row[4]}')
-  print(f'Salary: = {row[5]}')
-  print(f'Experience: = {row[6]}\n')
-
-
-def getDoctordWithinHospital(hospital_id):
-  print(f'Hospital ID: = {hospital_id}\n')
-  cur = link.cursor()
-  cur.execute("SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Hospital_Id = %s", (hospital_id,))
-  rows = cur.fetchall()
-  for row in rows:
+    cur = link.cursor()
+    cur.execute(
+        '''SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Doctor_Id = %s''',
+        (doctor_id,))
+    row = cur.fetchone()
     print(f'Doctor ID: = {row[0]}')
     print(f'Doctor Name: = {row[1]}')
     print(f'Hospital ID: = {row[2]}')
@@ -118,9 +106,27 @@ def getDoctordWithinHospital(hospital_id):
     print(f'Experience: = {row[6]}\n')
 
 
+def getDoctordWithinHospital(hospital_id):
+    print(f'Hospital ID: = {hospital_id}\n')
+    cur = link.cursor()
+    cur.execute(
+        "SELECT Doctor_Id, Doctor_Name, Hospital_Id, Joining_Date, Speciality, Salary, Experience FROM Doctors WHERE Hospital_Id = %s",
+        (hospital_id,))
+    rows = cur.fetchall()
+    for row in rows:
+        print(f'Doctor ID: = {row[0]}')
+        print(f'Doctor Name: = {row[1]}')
+        print(f'Hospital ID: = {row[2]}')
+        print(f'Joining Date: = {row[3]}')
+        print(f'Speciality: = {row[4]}')
+        print(f'Salary: = {row[5]}')
+        print(f'Experience: = {row[6]}\n')
+
+
 def updateDoctorsExperience(doctor_id):
     cur = link.cursor()
-    cur.execute("UPDATE Doctors SET Experience = date_part('year',age(Joining_Date)) WHERE Doctor_Id = %s;", (doctor_id,))
+    cur.execute("UPDATE Doctors SET Experience = date_part('year',age(Joining_Date)) WHERE Doctor_Id = %s;",
+                (doctor_id,))
 
 
 readHospitalDetails(1)
