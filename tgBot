@@ -1,0 +1,97 @@
+from __future__ import unicode_literals
+import logging
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram import Update
+import youtube_dl
+import json
+import operator
+
+
+class MyLogger(object):
+    def debug(self, msg):
+        global ytdl_str_dict
+        if 'uploader' in msg:
+            ytdl_str_dict = msg
+
+    def warning(self, msg):
+        pass
+
+    def error(self, msg):
+        pass
+
+
+
+ydl_opts = {
+    'nocheckcertificate': True,
+    'forcejson': True,
+    'format': 'best',
+    'logger': MyLogger(),
+    'simulate': True,
+    'skip_download': True
+}
+ydl = youtube_dl.YoutubeDL(ydl_opts)
+
+
+def start(update, context):
+    """Send a message when the command /start is issued."""
+    update.message.reply_text('Hi! Send me a YouTube link. Only.')
+
+
+def help(update, context):
+    """Send a message when the command /help is issued."""
+    update.message.reply_text('Get a URL download link for a YouTube video.')
+
+
+def echo(update, context):
+    """Echo the user message."""
+    reply = attack(url=update.message.text)
+    update.message.reply_text(reply)
+
+def attack(url):
+    ydl.download([url])
+    ytdl_dict = json.loads(ytdl_str_dict)
+    ytdl_formats = ytdl_dict['formats']
+    ytdl_muxed_formats = []
+
+    for i in range(len(ytdl_formats)):
+        if ytdl_formats[i]['ext'] == 'mp4' and ytdl_formats[i]['acodec'] != 'none':
+            ytdl_muxed_formats.append(ytdl_formats[i])
+
+    ytdl_sorted = sorted(ytdl_muxed_formats, key=operator.itemgetter('height'), reverse=True)
+    return ytdl_sorted[0]['url']
+    # print(ytdl_sorted[0]['url'])
+
+
+# def error(update, context):
+#     """Log Errors caused by Updates."""
+#     logger.warning('Update "%s" caused error "%s"', update, context.error)
+
+
+def main():
+    """Start the bot."""
+    # Create the Updater and pass it your bot's token.
+    # Make sure to set use_context=True to use the new context based callbacks
+    # Post version 12 this will no longer be necessary
+    updater = Updater("1093645474:AAEUAdR8QduE4jbXBsNZgRowJ66AmIevsJw", use_context=True)
+
+    # Get the dispatcher to register handlers
+    dp = updater.dispatcher
+
+    # on different commands - answer in Telegram
+    dp.add_handler(CommandHandler("start", start))
+    dp.add_handler(CommandHandler("help", help))
+
+    # on noncommand i.e message - echo the message on Telegram
+    dp.add_handler(MessageHandler(Filters.text, echo))
+
+    # Start the Bot
+    updater.start_polling()
+
+    # Run the bot until you press Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT. This should be used most of the time, since
+    # start_polling() is non-blocking and will stop the bot gracefully.
+    updater.idle()
+
+# attack('https://www.youtube.com/watch?v=X5Y5jKFGXC0')
+if __name__ == '__main__':
+    main()
