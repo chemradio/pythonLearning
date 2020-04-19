@@ -1,11 +1,11 @@
-bot_token = '1093645474:AAEUAdR8QduE4jbXBsNZgRowJ66AmIevsJw'
+bot_token = ''
 admin_id = 247066990
 attachments = '/Users/timurtimaev/Desktop/'
 max_file_size = 1048576
 postgresql_credentials = {
     'database': 'postgres',
     'user': 'postgres',
-    'password': 'whirlpool',
+    'password': '',
     'host': '127.0.0.1',
     'port': "5432"
 }
