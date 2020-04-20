@@ -12,7 +12,7 @@ from tgbot_quest_config import filepath
 from tgbot_quest_config import start_text
 from tgbot_quest_config import stupid_text
 from tgbot_quest_config import admin_id
-# from pprint import pprint
+from pprint import pprint
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove, Bot)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           ConversationHandler)
@@ -59,7 +59,6 @@ class PostgreDBHandler:
         self.conn.commit()
 
     def create_template_questions(self):
-        # creates 3 default questions inside QUESTIONS and ANSWERS tables in DB
         self.cur.execute(
             f"""INSERT INTO {tables[0]['question_base_name']} (
     {tables[0]['question_text']}, {tables[0]['question_type']}, {tables[0]['answer_types']},
@@ -75,7 +74,19 @@ class PostgreDBHandler:
         self.cur.execute(
             f"""INSERT INTO {tables[0]['question_base_name']} (
         {tables[0]['question_text']}, {tables[0]['question_type']}, {tables[0]['answer_types']},
-        {tables[0]['attachment']}) VALUES ('Send me a photo!', 3, ARRAY['photo', 'video', 'audio', 'document', 'any'], NULL)"""
+        {tables[0]['attachment']}) VALUES ('Send me a doc or audio!', 3, ARRAY['document', 'audio'], NULL)"""
+        )
+
+        self.cur.execute(
+            f"""INSERT INTO {tables[0]['question_base_name']} (
+        {tables[0]['question_text']}, {tables[0]['question_type']}, {tables[0]['answer_types']},
+        {tables[0]['attachment']}) VALUES ('Send me a pic or video!', 3, ARRAY['photo', 'video'], NULL)"""
+        )
+
+        self.cur.execute(
+            f"""INSERT INTO {tables[0]['question_base_name']} (
+        {tables[0]['question_text']}, {tables[0]['question_type']}, {tables[0]['answer_types']},
+        {tables[0]['attachment']}) VALUES ('Send me a any attached file!', 3, ARRAY['any'], NULL)"""
         )
 
         self.conn.commit()
@@ -255,6 +266,9 @@ class AdminHandler:
 
 
 pg = PostgreDBHandler()
+# pg.drop_tables()
+# pg.create_tables()
+# pg.create_template_questions()
 admin = AdminHandler()
 intervals = [['1 day', '7 days', '30 days']]
 
@@ -323,12 +337,16 @@ def admin_reply_analyzer(update, context):
 
 def reply_analyzer(update, context):
     message_dict = update.message.to_dict()
+    pprint(message_dict)
     if message_dict['from']['id'] == admin_id:
         admin_reply_analyzer(update, context)
     else:
         flag = 0
 
-        db_last_answer = pg.get_latest_answer(message_dict['from']['id'])
+        if pg.get_latest_answer(message_dict['from']['id']):
+            db_last_answer = pg.get_latest_answer(message_dict['from']['id'])
+        else:
+            db_last_answer = 0
         if db_last_answer >= pg.get_number_questions():
             end_of_questions(update, context)
             return
@@ -364,22 +382,44 @@ def reply_analyzer(update, context):
                 flag = 1
 
         elif question_type == 3:
-            # if 'document' in message_dict:
-            #     mime_type = message_dict['document']['mime_type'].split('/')[-1]
-            #     if mime_type in answer_types:
-            #         if message_dict['document']['file_size'] < max_file_size:
-            #             user_data['answer'] = message_dict['document']['file_id']
-            #         else:
-            #             flag = 2
-            #     else:
-            #         flag = 1
-            if 'photo' in message_dict and message_dict['photo']:
-                if message_dict['photo'][0]['file_size'] < max_file_size:
-                    user_data['answer'] = message_dict['photo'][0]['file_id']
-                else:
-                    flag = 2
+            full_array = ['audio', 'video', 'photo', 'document']
+            required_array = []
+            print(bool(message_dict['photo']))
+            if answer_types == ['any']:
+                required_array = full_array
             else:
+                for item in answer_types:
+                    required_array.append(item)
+            print(required_array)
+
+            for item in required_array:
+                print(item)
+                if item == 'photo' and message_dict['photo']:
+                    print('photo pass')
+                    if message_dict['photo'][0]['file_size'] < max_file_size:
+                        print('photo size pass')
+                        user_data['answer'] = message_dict['photo'][0]['file_id']
+                        break
+                    else:
+                        flag = 2
+                elif item in message_dict and item != 'photo':
+                    print('general pass')
+                    if message_dict[item]['file_size'] < max_file_size:
+                        print('general size pass')
+                        # print(message_dict[item])
+                        user_data['answer'] = message_dict[item]['file_id']
+                        break
+                    else:
+                        flag = 2
+
+            if 'answer' in user_data:
+                print(user_data['answer'])
+            elif flag == 2:
+                user_data['answer'] = 'max size exceed'
+            else:
+                user_data['answer'] = 'wrong'
                 flag = 1
+
         else:
             print('error question')
 
